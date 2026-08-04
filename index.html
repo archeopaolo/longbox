@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#C8342A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Longbox">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Longbox — la tua collezione di fumetti</title>
+<style>
+  :root{
+    --paper:#EFE6D6;
+    --paper-dark:#E4D8C2;
+    --ink:#1C1A17;
+    --ink-soft:#4A443B;
+    --red:#C8342A;
+    --red-dark:#8F2119;
+    --blue:#2F5C8A;
+    --gold:#D9A441;
+    --gold-dark:#9C6F1E;
+    --panel-border:#1C1A17;
+    --card-bg:#FBF6EC;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle, rgba(28,26,23,0.06) 1px, transparent 1.2px);
+    background-size:10px 10px;
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 20px 80px;}
+
+  /* HEADER */
+  header{
+    display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+    gap:16px;border-bottom:4px solid var(--ink);padding-bottom:14px;margin-bottom:20px;
+  }
+  .logo{
+    font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;
+    font-weight:400;
+    font-size:52px;
+    letter-spacing:1px;
+    color:var(--red);
+    -webkit-text-stroke:1.5px var(--ink);
+    line-height:1;
+    transform:rotate(-1.5deg);
+    display:inline-block;
+  }
+  .tagline{font-size:13px;color:var(--ink-soft);margin-top:4px;letter-spacing:.02em;}
+
+  /* STATS */
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+  .stat{
+    background:var(--card-bg);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    padding:10px 16px;
+    min-width:110px;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .stat .num{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-weight:700;font-size:22px;color:var(--red-dark);}
+  .stat .lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);}
+
+  /* TOOLBAR */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;align-items:center;}
+  .bubble{
+    position:relative;
+    background:#fff;
+    border:2px solid var(--ink);
+    border-radius:22px;
+    padding:9px 16px;
+    flex:1 1 220px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .bubble input{
+    border:none;outline:none;background:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    font-size:14px;width:100%;color:var(--ink);
+  }
+  select, .btn, .bubble{font-size:14px;}
+  select{
+    border:2px solid var(--ink);border-radius:var(--radius);padding:8px 10px;
+    background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--ink);
+  }
+  .btn{
+    border:2px solid var(--ink);background:var(--gold);color:var(--ink);
+    border-radius:var(--radius);padding:9px 16px;font-weight:600;cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);transition:transform .06s;
+  }
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  .btn.primary{background:var(--red);color:#fff;}
+  .btn.ghost{background:#fff;}
+
+  /* GRID */
+  #grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px;
+  }
+  .card{
+    background:var(--card-bg);
+    border:2px solid var(--ink);
+    border-radius:var(--radius);
+    overflow:hidden;
+    cursor:pointer;
+    box-shadow:4px 4px 0 var(--ink);
+    transition:transform .08s;
+    display:flex;flex-direction:column;
+  }
+  .card:hover{transform:translate(-2px,-2px);}
+  .cover{
+    aspect-ratio:2/3;width:100%;background:var(--blue);
+    background-size:cover;background-position:center;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;border-bottom:2px solid var(--ink);
+  }
+  .cover.placeholder{
+    background-image:radial-gradient(circle, rgba(255,255,255,0.35) 1.4px, transparent 1.6px);
+    background-size:9px 9px;
+  }
+  .cover .issue-big{
+    font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;color:#fff;font-size:38px;
+    -webkit-text-stroke:1px var(--ink);text-shadow:2px 2px 0 var(--ink);
+  }
+  .badge{
+    position:absolute;top:6px;right:6px;
+    background:var(--gold);color:var(--ink);
+    font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:10px;font-weight:700;
+    padding:3px 6px;border:1.5px solid var(--ink);border-radius:4px;
+    transform:rotate(4deg);
+  }
+  .edition-badge{
+    position:absolute;top:34px;right:6px;
+    color:#fff;font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:9px;font-weight:700;
+    padding:3px 6px;border:1.5px solid var(--ink);border-radius:4px;
+    transform:rotate(-2deg);text-transform:uppercase;
+  }
+  .edition-badge.variant{background:var(--blue);}
+  .edition-badge.virgin{background:#6E4B8B;}
+  .edition-badge.foil{background:var(--gold-dark);}
+  .edition-badge.blank{background:#6B6B6B;}
+  .edition-badge.sketch{background:#5A4A3A;}
+  .edition-badge.limited{background:var(--red-dark);}
+  .edition-badge.signed{background:#3B6D11;}
+  .edition-badge.other{background:var(--ink-soft);}
+  .catalog-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:22px;align-items:start;}
+  .catalog-main{min-width:0;}
+  .series-section{position:sticky;top:18px;margin:0;background:var(--card-bg);border:2px solid var(--ink);border-radius:var(--radius);box-shadow:4px 4px 0 var(--ink);padding:13px;max-height:calc(100vh - 36px);overflow:auto;}
+  .series-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--ink);}
+  .series-heading h2{margin:0;font-size:14px;text-transform:uppercase;letter-spacing:.06em;}
+  .series-list{display:block;}
+  .series-chip{
+    border:2px solid var(--ink);background:#fff;border-radius:18px;padding:6px 11px;
+    font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    cursor:pointer;box-shadow:2px 2px 0 var(--ink);
+  }
+  .series-chip.active{background:var(--blue);color:#fff;}
+  .series-count{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-size:10px;margin-left:4px;opacity:.75;}
+  .series-current{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  .universe-group{border:2px solid var(--ink);border-radius:6px;background:var(--card-bg);margin-bottom:10px;overflow:hidden;}
+  .universe-head{width:100%;display:flex;justify-content:space-between;align-items:center;border:0;border-bottom:1.5px solid var(--ink);background:var(--gold);padding:8px 10px;font-weight:700;cursor:pointer;text-align:left;}
+  .universe-series{display:block;padding:7px 8px;}
+  .universe-group.collapsed .universe-series{display:none;}
+  .series-node{margin-bottom:5px;}
+  .series-chip{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;border-radius:5px;box-shadow:none;padding:7px 9px;}
+  .series-issues{display:none;margin:3px 0 8px 13px;padding-left:9px;border-left:2px solid var(--ink);}
+  .series-node.expanded .series-issues{display:block;}
+  .issue-link{width:100%;display:block;border:0;background:transparent;color:var(--ink);padding:5px 6px;text-align:left;font:12px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;cursor:pointer;border-radius:4px;}
+  .issue-link:hover{background:var(--paper-dark);}
+  .issue-link.active{background:var(--blue);color:#fff;font-weight:700;}
+  .issue-number{font-family:'SFMono-Regular',Menlo,Consolas,monospace;font-weight:700;margin-right:5px;}
+  .filter-select{min-width:145px;}
+  .card-body{padding:9px 10px 11px;}
+  .card-title{font-size:13px;font-weight:600;line-height:1.25;margin:0 0 2px;}
+  .card-sub{font-size:11px;color:var(--ink-soft);margin:0;font-family:'SFMono-Regular',Menlo,Consolas,monospace;}
+
+  .empty{
+    grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--ink-soft);
+  }
+  .empty .logo{font-size:34px;}
+
+  /* MODAL */
+  .overlay{
+    position:fixed;inset:0;background:rgba(28,26,23,0.55);
+    display:none;align-items:flex-start;justify-content:center;
+    padding:30px 16px;overflow-y:auto;z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--paper);border:3px solid var(--ink);border-radius:8px;
+    max-width:560px;width:100%;padding:22px 22px 26px;box-shadow:6px 6px 0 var(--ink);
+    margin-bottom:30px;
+  }
+  .modal h2{font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;font-size:28px;color:var(--red);margin:0 0 14px;
+    -webkit-text-stroke:.6px var(--ink);}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+  .field input, .field select, .field textarea{
+    width:100%;border:2px solid var(--ink);border-radius:5px;padding:8px 10px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:14px;background:#fff;color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:56px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .modal-actions{display:flex;justify-content:space-between;margin-top:18px;gap:10px;}
+  .modal-actions .right{display:flex;gap:10px;}
+
+  @media (max-width:820px){
+    .catalog-layout{grid-template-columns:1fr;}
+    .series-section{position:static;max-height:none;margin-bottom:18px;}
+  }
+  @media (max-width:520px){
+    .logo{font-size:38px;}
+    .row2,.row3{grid-template-columns:1fr;}
+  }
+
+  .backup-bar{
+    display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+    margin-top:34px;padding-top:14px;border-top:2px dashed var(--ink);
+    font-size:12px;color:var(--ink-soft);
+  }
+  .btn.small{padding:6px 12px;font-size:12px;box-shadow:2px 2px 0 var(--ink);}
+
+  /* COVER UPLOAD */
+  .cover-upload{
+    display:flex;gap:12px;align-items:flex-start;
+  }
+  .cover-preview{
+    width:78px;height:117px;flex-shrink:0;border:2px solid var(--ink);border-radius:5px;
+    background:var(--blue);background-size:cover;background-position:center;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .cover-preview.empty{
+    background-image:radial-gradient(circle, rgba(255,255,255,0.35) 1.4px, transparent 1.6px);
+    background-size:8px 8px;
+  }
+  .cover-controls{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .cover-controls input[type=file]{
+    border:2px solid var(--ink);border-radius:5px;padding:6px 8px;background:#fff;font-size:12px;
+  }
+  .cover-controls .or{font-size:11px;color:var(--ink-soft);margin:2px 0 0;}
+  .cover-controls .remove-cover{align-self:flex-start;}
+
+  /* DRIVE PANEL */
+  .drive-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .drive-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);}
+  .drive-status .dot{width:9px;height:9px;border-radius:50%;background:var(--red-dark);border:1.5px solid var(--ink);}
+  .drive-status.connected .dot{background:#3B6D11;}
+  .drive-status.syncing .dot{background:var(--gold-dark);}
+  .sync-meta{width:100%;font-size:10px;color:var(--ink-soft);text-align:right;}
+  .offline-banner{display:none;margin-bottom:14px;padding:9px 12px;border:2px solid var(--ink);border-radius:var(--radius);background:var(--gold);font-size:12px;font-weight:700;}
+  .offline-banner.show{display:block;}
+  .install-hint{display:none;margin-bottom:14px;padding:10px 12px;border:2px dashed var(--ink);border-radius:var(--radius);background:var(--card-bg);font-size:12px;}
+  .install-hint.show{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .missing-card{border-style:dashed;}
+  .missing-card .cover{filter:saturate(.55);}
+  .buy-badge{position:absolute;bottom:6px;left:6px;background:var(--red);color:#fff;border:1.5px solid var(--ink);border-radius:4px;padding:3px 6px;font-size:10px;font-weight:700;}
+  .issue-link.missing{color:var(--red-dark);font-weight:700;}
+  .purchase-field{background:var(--card-bg);border:1.5px dashed var(--ink);border-radius:5px;padding:10px;}
+  .sync-pending{width:100%;font-size:11px;font-weight:700;text-align:right;}
+  .sync-pending.ok{color:#3B6D11}.sync-pending.waiting{color:var(--gold-dark)}.sync-pending.error{color:var(--red-dark)}
+  .shop-mode .card-body{padding:7px 8px}.shop-mode #grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
+  .shop-mode .stats,.shop-mode .backup-bar{display:none}
+  .bulk-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:10px;border:2px dashed var(--ink);background:var(--card-bg);border-radius:var(--radius)}
+  .bulk-bar.show{display:flex}.select-comic{position:absolute;top:6px;left:6px;width:20px;height:20px;z-index:3}
+  .update-banner{display:none;margin-bottom:14px;padding:10px 12px;border:2px solid var(--ink);background:var(--blue);color:#fff;border-radius:var(--radius);align-items:center;justify-content:space-between;gap:10px}
+  .update-banner.show{display:flex}
+  .duplicate-warning{display:none;margin-bottom:12px;padding:8px 10px;border:2px solid var(--red-dark);background:#fff;border-radius:5px;color:var(--red-dark);font-size:12px;font-weight:700}
+  .duplicate-warning.show{display:block}
+  .series-config-list{max-height:58vh;overflow:auto}.series-config-row{display:grid;grid-template-columns:minmax(0,1fr) 72px 72px auto;gap:8px;align-items:center;margin-bottom:10px;padding:9px;border:1.5px dashed var(--ink);border-radius:5px;background:var(--card-bg)}.series-config-row .series-actions{display:flex;gap:6px;flex-wrap:wrap}.series-config-row input,.series-config-row select{min-width:0}.series-config-summary{font-size:11px;color:var(--ink-soft);grid-column:1/-1}.series-generate-options{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:10px;border:2px solid var(--ink);border-radius:5px;background:#fff}.series-generate-options label{font-size:11px;font-weight:700;text-transform:uppercase}.series-generate-options select{padding:6px 8px}.series-generate-result{display:none;margin:0 0 12px;padding:9px 10px;border:2px solid var(--ink);border-radius:5px;background:var(--gold);font-size:12px;font-weight:700}.series-generate-result.show{display:block}@media(max-width:620px){.series-config-row{grid-template-columns:1fr 1fr}.series-config-row>strong,.series-config-row .series-actions,.series-config-summary{grid-column:1/-1}}
+  .virtual-missing{opacity:.8;font-style:italic}
+  .storage-meta{font-size:11px;color:var(--ink-soft);margin-left:auto}
+  .contents-list{display:flex;flex-direction:column;gap:8px;margin-bottom:9px}
+  .content-row{display:grid;grid-template-columns:105px minmax(0,1fr) 110px 72px 72px auto;gap:8px;align-items:end;padding:9px;border:1.5px dashed var(--ink);border-radius:5px;background:var(--card-bg)}
+  .content-row .field{margin:0}.content-row .btn{align-self:end}
+  .contents-help{font-size:11px;color:var(--ink-soft);margin:0 0 8px}
+  .contents-preview{font-size:12px;line-height:1.45;margin-top:9px;padding:8px 10px;border-left:3px solid var(--blue);background:#fff;border-radius:0 5px 5px 0}
+  .contents-preview:empty{display:none}
+  @media (max-width:700px){.content-row{grid-template-columns:1fr 1fr}.content-row .content-series-field{grid-column:1/-1}.content-row .remove-content-row{grid-column:1/-1;justify-self:start}}
+  .market-group{margin:6px 0 9px 8px;border-left:2px solid var(--blue);padding-left:7px}.market-head,.run-head{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;font-weight:700;padding:5px 4px}.run-group{margin:4px 0 6px 8px;border-left:2px solid var(--paper-dark);padding-left:7px}.content-match{margin-top:5px;padding:5px 6px;border-left:3px solid var(--red);background:#fff;font-size:10px;line-height:1.35}
+
+  .settings-modal{max-width:460px;}
+  .settings-modal .field small{display:block;color:var(--ink-soft);font-size:11px;margin-top:4px;}
+  .settings-modal .drive-file-note{
+    font-size:12px;color:var(--ink-soft);background:var(--card-bg);border:1.5px dashed var(--ink);
+    border-radius:5px;padding:8px 10px;margin-top:10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <span class="logo">LONGBOX</span>
+      <div class="tagline">la tua collezione, catalogata come si deve.</div>
+    </div>
+    <div class="drive-panel">
+      <div class="drive-status" id="driveStatus">
+        <span class="dot" id="driveDot"></span>
+        <span id="driveStatusText">Non connesso</span>
+      </div>
+      <button class="btn small ghost" id="driveConnectBtn">Connetti Google Drive</button>
+      <button class="btn small ghost" id="syncNowBtn">Sincronizza ora</button>
+      <button class="btn small ghost" id="driveSettingsBtn" title="Impostazioni">⚙</button>
+      <div class="sync-meta" id="lastSyncText">Ultima sincronizzazione: mai</div>
+      <div class="sync-pending ok" id="pendingSyncText">Tutto sincronizzato</div>
+    </div>
+  </header>
+
+  <div class="offline-banner" id="offlineBanner">Modalità offline: stai consultando la copia salvata su questo dispositivo.</div>
+  <div class="update-banner" id="updateBanner"><span>È disponibile una nuova versione di Longbox.</span><button class="btn small ghost" id="reloadAppBtn" type="button">Aggiorna ora</button></div>
+  <div class="install-hint" id="installHint"><span>Installa Longbox sull’iPhone: in Safari usa <strong>Condividi → Aggiungi alla schermata Home</strong>.</span><button class="btn ghost small" id="dismissInstallHint" type="button">Nascondi</button></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="catalog-layout">
+    <aside class="series-section" id="seriesSection" aria-label="Navigazione collezione">
+      <div class="series-heading"><h2>Universi e serie</h2><button class="btn small ghost" id="seriesConfigBtn" type="button">Gestione serie</button></div>
+      <div class="series-list" id="seriesList"></div>
+      <div class="series-current" id="seriesCurrent" style="display:none;"></div>
+    </aside>
+
+    <main class="catalog-main">
+  <div class="toolbar">
+    <div class="bubble">
+      <span aria-hidden="true">🔎</span>
+      <input id="search" type="text" placeholder="Cerca per titolo, serie, autore...">
+    </div>
+    <select id="filterUniverse" class="filter-select">
+      <option value="">Tutti gli universi</option>
+    </select>
+    <select id="filterMarket" class="filter-select">
+      <option value="">Tutti i mercati</option>
+    </select>
+    <select id="filterLanguage" class="filter-select">
+      <option value="">Tutte le lingue</option>
+    </select>
+    <select id="filterPublisher" class="filter-select">
+      <option value="">Tutti gli editori</option>
+    </select>
+    <select id="filterCollection" class="filter-select">
+      <option value="">Tutte le collane</option>
+    </select>
+    <select id="filterAcquisition">
+      <option value="">Posseduti e da acquistare</option>
+      <option value="owned">Solo posseduti</option>
+      <option value="wanted">Solo da acquistare</option>
+      <option value="preordered">Solo preordinati</option>
+      <option value="ignored">Solo non interessano</option>
+    </select>
+    <select id="filterFormat">
+      <option value="">Tutti i formati</option>
+      <option>Singolo albo</option>
+      <option>Graphic Novel</option>
+      <option>TPB / Volume</option>
+      <option>Omnibus</option>
+    </select>
+    <select id="sortBy">
+      <option value="added_desc">Aggiunti di recente</option>
+      <option value="title_asc">Titolo A-Z</option>
+      <option value="year_desc">Anno (più recente)</option>
+      <option value="value_desc">Prezzo di copertina (più alto)</option>
+    </select>
+    <button class="btn ghost" id="applyFiltersBtn">Applica filtri</button>
+    <button class="btn ghost" id="clearFiltersBtn">Azzera filtri</button>
+    <button class="btn ghost" id="shopModeBtn">Modalità fumetteria</button>
+    <button class="btn ghost" id="addWantedBtn">+ Da acquistare</button>
+    <button class="btn primary" id="addBtn">+ Nuovo fumetto</button>
+  </div>
+
+  <div class="bulk-bar" id="bulkBar">
+    <strong id="bulkCount">0 selezionati</strong>
+    <button class="btn small primary" id="bulkOwnedBtn" type="button">Segna come posseduti</button>
+    <button class="btn small ghost" id="bulkClearBtn" type="button">Annulla selezione</button>
+  </div>
+  <div id="grid"></div>
+
+  <div class="backup-bar">
+    <span>I dati sono conservati sul dispositivo e, quando connesso, sincronizzati con Google Drive.</span>
+    <button class="btn ghost small" id="exportBtn">Esporta JSON</button>
+    <button class="btn ghost small" id="exportCsvBtn">Esporta CSV</button>
+    <button class="btn ghost small" id="importBtn">Importa backup</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none;">
+    <span class="storage-meta" id="storageMeta"></span>
+  </div>
+    </main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Nuovo fumetto</h2>
+    <input type="hidden" id="editId">
+    <div class="field">
+      <label for="f-title">Titolo *</label>
+      <input id="f-title" type="text" placeholder="es. The Amazing Spider-Man">
+    </div>
+    <div class="field purchase-field">
+      <label for="f-acquisition">Stato nella collezione</label>
+      <select id="f-acquisition">
+        <option value="owned">Posseduto</option>
+        <option value="wanted">Da acquistare</option>
+        <option value="preordered">Preordinato</option>
+        <option value="ignored">Non interessa</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-series">Serie</label>
+        <input id="f-series" type="text" list="seriesOptions" placeholder="es. The Amazing Spider-Man">
+      </div>
+      <div class="field">
+        <label for="f-run">Volume / Run</label>
+        <input id="f-run" type="text" list="runOptions" placeholder="es. Vol. 7">
+      </div>
+    </div>
+    <div class="row3">
+      <div class="field">
+        <label for="f-number">Numero</label>
+        <input id="f-number" type="text" placeholder="es. 13">
+      </div>
+      <div class="field">
+        <label for="f-issue">Numerazione assoluta (Legacy)</label>
+        <input id="f-issue" type="text" placeholder="es. 889">
+      </div>
+      <div class="field">
+        <label for="f-story-arc">Ciclo narrativo</label>
+        <input id="f-story-arc" type="text" list="storyArcOptions" placeholder="es. Spider-Verse">
+      </div>
+    </div>
+    <div class="row3">
+      <div class="field">
+        <label for="f-universe">Universo / Licenza</label>
+        <input id="f-universe" type="text" list="universeOptions" placeholder="es. Marvel">
+      </div>
+      <div class="field">
+        <label for="f-market">Mercato</label>
+        <input id="f-market" type="text" list="marketOptions" placeholder="es. Italia o USA">
+      </div>
+      <div class="field">
+        <label for="f-language">Lingua</label>
+        <input id="f-language" type="text" list="languageOptions" placeholder="es. Italiano o Inglese">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-publisher">Editore</label>
+        <input id="f-publisher" type="text" list="publisherOptions" placeholder="es. Panini Comics">
+      </div>
+      <div class="field">
+        <label for="f-collection">Collana editoriale</label>
+        <input id="f-collection" type="text" list="collectionOptions" placeholder="es. Marvel Collection">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-year">Anno</label>
+      <input id="f-year" type="number" placeholder="es. 1988" style="max-width:200px;">
+    </div>
+    <datalist id="seriesOptions"></datalist>
+    <datalist id="runOptions"></datalist>
+    <datalist id="storyArcOptions"></datalist>
+    <datalist id="universeOptions"></datalist>
+    <datalist id="marketOptions"></datalist>
+    <datalist id="languageOptions"></datalist>
+    <datalist id="publisherOptions"></datalist>
+    <datalist id="collectionOptions"></datalist>
+    <div class="row2">
+      <div class="field">
+        <label for="f-writer">Sceneggiatore</label>
+        <input id="f-writer" type="text">
+      </div>
+      <div class="field">
+        <label for="f-artist">Disegnatore</label>
+        <input id="f-artist" type="text">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-format">Formato</label>
+        <select id="f-format">
+          <option>Singolo albo</option>
+          <option>Graphic Novel</option>
+          <option>TPB / Volume</option>
+          <option>Omnibus</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-condition">Condizione</label>
+        <select id="f-condition">
+          <option>NM - Near Mint</option>
+          <option>VF - Very Fine</option>
+          <option>FN - Fine</option>
+          <option>VG - Very Good</option>
+          <option>GD - Good</option>
+          <option>PR - Poor</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-edition">Edizione</label>
+        <select id="f-edition">
+          <option>Standard</option>
+          <option>Variant Cover</option>
+          <option>Virgin Variant</option>
+          <option>Foil Variant</option>
+          <option>Blank Cover</option>
+          <option>Sketch Cover</option>
+          <option>Limited Edition</option>
+          <option>Signed Edition</option>
+          <option>Altro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-printing">Stampa (facoltativa)</label>
+        <input id="f-printing" type="number" min="1" step="1" placeholder="es. 1">
+      </div>
+    </div>
+    <div class="field" id="editionDetailsField" style="display:none;">
+      <label for="f-edition-details">Dettagli edizione</label>
+      <input id="f-edition-details" type="text" placeholder="es. Marco Checchetto Variant, Lucca Comics Exclusive">
+    </div>
+    <div class="field" id="volumeContentsField">
+      <label>Contenuti originali</label>
+      <p class="contents-help">Disponibile per qualsiasi formato. Registra i numeri originali USA contenuti nello spillato italiano o nella raccolta. Lascia “Al n.” vuoto per un solo numero.</p>
+      <div class="contents-list" id="contentsList"></div>
+      <button class="btn ghost small" id="addContentRowBtn" type="button">+ Aggiungi contenuto originale</button>
+      <div class="contents-preview" id="contentsPreview" aria-live="polite"></div>
+    </div>
+    <div class="field">
+      <label for="f-price">Prezzo di copertina (€)</label>
+      <input id="f-price" type="number" step="0.01" placeholder="0" style="max-width:200px;">
+    </div>
+    <div class="row3">
+      <div class="field"><label for="f-paid-price">Prezzo pagato (€)</label><input id="f-paid-price" type="number" step="0.01" placeholder="0"></div>
+      <div class="field"><label for="f-max-price">Prezzo massimo desiderato (€)</label><input id="f-max-price" type="number" step="0.01" placeholder="0"></div>
+      <div class="field"><label for="f-quantity">Quantità</label><input id="f-quantity" type="number" min="1" step="1" value="1"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="f-purchase-date">Data acquisto</label><input id="f-purchase-date" type="date"></div>
+      <div class="field"><label for="f-shop">Negozio</label><input id="f-shop" type="text" placeholder="es. Fumetteria..."></div>
+    </div>
+    <div class="field">
+      <label for="f-barcode">EAN / ISBN / Codice editore</label>
+      <div style="display:flex;gap:8px"><input id="f-barcode" type="text" inputmode="numeric" placeholder="es. 978..."><button class="btn small ghost" id="scanBarcodeBtn" type="button">Scansiona</button></div>
+    </div>
+    <div class="duplicate-warning" id="duplicateWarning">Possibile duplicato: esiste già una scheda con la stessa serie, mercato, run, numero, edizione e stampa.</div>
+    <div class="field">
+      <label>Copertina</label>
+      <div class="cover-upload">
+        <div class="cover-preview empty" id="coverPreview"></div>
+        <div class="cover-controls">
+          <input type="file" id="f-photo" accept="image/*" capture="environment">
+          <p class="or">oppure incolla un URL immagine</p>
+          <input id="f-cover" type="text" placeholder="https://...">
+          <button type="button" class="btn ghost small remove-cover" id="removeCoverBtn" style="display:none;">Rimuovi</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-tags">Tag (separati da virgola)</label>
+      <input id="f-tags" type="text" placeholder="es. supereroi, anni 80, prima apparizione">
+    </div>
+    <div class="field">
+      <label for="f-notes">Note</label>
+      <textarea id="f-notes" placeholder="Condizioni particolari, dove l'hai comprato, curiosità..."></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="deleteBtn" style="display:none;background:#fff;">Elimina</button>
+      <div class="right">
+        <button class="btn ghost" id="cancelBtn">Annulla</button>
+        <button class="btn primary" id="saveBtn">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="seriesConfigOverlay">
+  <div class="modal" style="max-width:760px">
+    <h2>Gestione serie</h2>
+    <p style="font-size:12px;color:var(--ink-soft)">Imposta l’intervallo previsto e genera in blocco soltanto le numerazioni che non sono ancora presenti.</p>
+    <div class="series-generate-options">
+      <label for="seriesGenerateState">Stato delle nuove schede</label>
+      <select id="seriesGenerateState">
+        <option value="owned">Posseduto</option>
+        <option value="wanted">Da acquistare</option>
+        <option value="preordered">Preordinato</option>
+      </select>
+      <span style="font-size:11px;color:var(--ink-soft)">Le nuove schede ereditano i dati editoriali da una scheda già presente nella stessa serie.</span>
+    </div>
+    <div class="series-generate-result" id="seriesGenerateResult" aria-live="polite"></div>
+    <div class="series-config-list" id="seriesConfigList"></div>
+    <div class="modal-actions"><div></div><div class="right"><button class="btn ghost" id="seriesConfigCloseBtn" type="button">Chiudi</button><button class="btn primary" id="seriesConfigSaveBtn" type="button">Salva intervalli</button></div></div>
+  </div>
+</div>
+
+<div class="overlay" id="settingsOverlay">
+  <div class="modal settings-modal">
+    <h2>Google Drive</h2>
+    <div class="field">
+      <label for="f-clientid">ID client OAuth</label>
+      <input id="f-clientid" type="text" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+      <small>Lo trovi in Google Cloud Console → Credenziali. Resta salvato solo su questo browser.</small>
+    </div>
+    <div class="drive-file-note">
+      L'app usa la cartella <strong>Longobox</strong>: conserva <strong>longbox-data.json</strong> e crea automaticamente la sottocartella <strong>Covers</strong> per alleggerire la sincronizzazione. Le vecchie copertine vengono migrate gradualmente senza interventi manuali.
+    </div>
+    <div class="modal-actions">
+      <div></div>
+      <div class="right">
+        <button class="btn ghost" id="settingsCancelBtn">Chiudi</button>
+        <button class="btn primary" id="settingsSaveBtn">Salva</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+let comics = [];
+let loaded = false;
+let selectedSeries = '';
+let selectedUniverse = '';
+let selectedMarket = '';
+let selectedRun = '';
+let selectedComicId = '';
+let pendingCoverData = null; // base64 dell'ultima foto caricata nel form, null = non toccata
+let shopMode = false;
+let selectedForBulk = new Set();
+let waitingServiceWorker = null;
+
+const DB_NAME = 'longboxDB';
+const STORE_NAME = 'comics';
+let dbPromise = null;
+
+const DRIVE_FOLDER_NAME = 'Longobox';
+const DRIVE_COVERS_FOLDER_NAME = 'Covers';
+const COVER_MIGRATION_BATCH = 8;
+const DRIVE_FILE_NAME = 'longbox-data.json';
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+let driveTokenClient = null;
+let driveAccessToken = null;
+let driveFileId = localStorage.getItem('longbox_drive_file_id') || null;
+let driveFolderId = localStorage.getItem('longbox_drive_folder_id') || null;
+let driveCoversFolderId = localStorage.getItem('longbox_drive_covers_folder_id') || null;
+let driveSyncTimer = null;
+let driveConnected = false;
+let driveReconnectAttempt = false;
+let deferredInstallPrompt = null;
+
+function openDB(){
+  if(dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains(STORE_NAME)){
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return dbPromise;
+}
+
+function setDriveStatus(state, text){
+  const el = document.getElementById('driveStatus');
+  el.className = 'drive-status' + (state ? ' ' + state : '');
+  document.getElementById('driveStatusText').textContent = text;
+}
+
+function formatSyncDate(value){
+  if(!value) return 'mai';
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return 'mai';
+  return d.toLocaleString('it-IT', {dateStyle:'short', timeStyle:'short'});
+}
+
+function updateLastSyncText(){
+  const value = localStorage.getItem('longbox_last_sync');
+  document.getElementById('lastSyncText').textContent = `Ultima sincronizzazione: ${formatSyncDate(value)}`;
+}
+
+function pendingSyncCount(){ return parseInt(localStorage.getItem('longbox_pending_sync') || '0', 10) || 0; }
+function updatePendingSyncText(state=''){
+  const el = document.getElementById('pendingSyncText');
+  const count = pendingSyncCount();
+  el.className = 'sync-pending ' + (state || (count ? 'waiting' : 'ok'));
+  el.textContent = state === 'error' ? 'Errore di sincronizzazione' : (count ? `${count} modifiche da sincronizzare` : 'Tutto sincronizzato');
+}
+function markLocalChange(){
+  localStorage.setItem('longbox_pending_sync', String(pendingSyncCount()+1));
+  updatePendingSyncText();
+}
+function markDriveSynced(){
+  localStorage.setItem('longbox_last_sync', new Date().toISOString());
+  localStorage.setItem('longbox_pending_sync','0');
+  updateLastSyncText();
+  updatePendingSyncText();
+}
+function recordTime(r){ return new Date(r.updatedAt || r.addedAt || 0).getTime() || 0; }
+function normalizeRecord(r){
+  return {...r, createdAt:r.createdAt || r.addedAt || new Date().toISOString(), updatedAt:r.updatedAt || r.createdAt || r.addedAt || new Date().toISOString()};
+}
+function mergeRecords(local, remote){
+  const map = new Map();
+  [...local,...remote].forEach(raw=>{
+    const r=normalizeRecord(raw);
+    const prev=map.get(r.id);
+    if(!prev || recordTime(r) >= recordTime(prev)) map.set(r.id,r);
+  });
+  return [...map.values()];
+}
+function activeComics(){ return comics.filter(c=>!c.deletedAt); }
+
+function getSavedClientId(){
+  return localStorage.getItem('longbox_client_id') || '';
+}
+
+function hasPreviousDriveAuthorization(){
+  return localStorage.getItem('longbox_drive_authorized') === '1';
+}
+
+function updateDriveReconnectUI(){
+  const btn = document.getElementById('driveConnectBtn');
+  if(!btn || driveConnected) return;
+  if(getSavedClientId() && hasPreviousDriveAuthorization()){
+    btn.textContent = 'Ricollega Drive';
+    setDriveStatus('', 'Drive configurato — clicca per ricollegare');
+  }else{
+    btn.textContent = 'Connetti Google Drive';
+    setDriveStatus('', 'Non connesso');
+  }
+}
+
+function initDriveTokenClient(){
+  const clientId = getSavedClientId();
+  if(!clientId || !window.google || !google.accounts) return null;
+  if(driveTokenClient) return driveTokenClient;
+  driveTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: DRIVE_SCOPE,
+    callback: async (resp) => {
+      if(resp.error){
+        console.warn('Autorizzazione Drive non riuscita', resp);
+        driveReconnectAttempt = false;
+        document.getElementById('driveConnectBtn').textContent = 'Autorizza Google Drive';
+        setDriveStatus('', 'Serve una nuova autorizzazione Google');
+        return;
+      }
+      driveReconnectAttempt = false;
+      driveAccessToken = resp.access_token;
+      driveConnected = true;
+      localStorage.setItem('longbox_drive_authorized', '1');
+      document.getElementById('driveConnectBtn').textContent = 'Disconnetti';
+      setDriveStatus('syncing', 'Sincronizzazione...');
+      await driveInitialSync();
+    }
+  });
+  return driveTokenClient;
+}
+
+async function driveApi(path, options = {}){
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${driveAccessToken}`
+    }
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error(`Drive API ${res.status}: ${errText}`);
+  }
+  return res;
+}
+
+function driveQueryValue(value){
+  return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+async function driveFindFolder(){
+  const name = driveQueryValue(DRIVE_FOLDER_NAME);
+  const q = encodeURIComponent(`name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,parents)&orderBy=createdTime`);
+  const data = await res.json();
+  return data.files && data.files.length ? data.files[0] : null;
+}
+
+async function driveCreateFolder(){
+  const res = await driveApi('https://www.googleapis.com/drive/v3/files?fields=id,name,parents', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: DRIVE_FOLDER_NAME,
+      mimeType: 'application/vnd.google-apps.folder'
+    })
+  });
+  return res.json();
+}
+
+async function driveFindChildFolder(parentId, name){
+  const q = encodeURIComponent(`name='${driveQueryValue(name)}' and mimeType='application/vnd.google-apps.folder' and '${driveQueryValue(parentId)}' in parents and trashed=false`);
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,parents)&orderBy=createdTime`);
+  const data = await res.json();
+  return data.files && data.files.length ? data.files[0] : null;
+}
+
+async function driveCreateChildFolder(parentId, name){
+  const res = await driveApi('https://www.googleapis.com/drive/v3/files?fields=id,name,parents', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name, mimeType:'application/vnd.google-apps.folder', parents:[parentId]})
+  });
+  return res.json();
+}
+
+async function driveEnsureCoversFolder(){
+  const parent = await driveEnsureFolder();
+  if(driveCoversFolderId){
+    try{
+      const saved=await driveGetFileMetadata(driveCoversFolderId);
+      if(!saved.trashed && saved.name===DRIVE_COVERS_FOLDER_NAME && (saved.parents||[]).includes(parent.id)) return saved;
+    }catch(e){ console.warn('Cartella Covers salvata non più disponibile',e); }
+    driveCoversFolderId=null; localStorage.removeItem('longbox_drive_covers_folder_id');
+  }
+  let folder=await driveFindChildFolder(parent.id, DRIVE_COVERS_FOLDER_NAME);
+  if(!folder) folder=await driveCreateChildFolder(parent.id, DRIVE_COVERS_FOLDER_NAME);
+  driveCoversFolderId=folder.id; localStorage.setItem('longbox_drive_covers_folder_id',folder.id);
+  return folder;
+}
+
+function dataUrlToBlob(dataUrl){
+  const match=String(dataUrl||'').match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+  if(!match) throw new Error('Copertina locale non valida');
+  const mime=match[1]||'image/webp';
+  const bytes=match[2] ? atob(match[3]) : decodeURIComponent(match[3]);
+  const arr=new Uint8Array(bytes.length); for(let i=0;i<bytes.length;i++) arr[i]=bytes.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
+async function driveUploadCover(comic){
+  if(!comic.coverData || comic.coverFileId) return comic;
+  const folder=await driveEnsureCoversFolder();
+  const blob=dataUrlToBlob(comic.coverData);
+  const ext=blob.type.includes('png')?'png':blob.type.includes('jpeg')?'jpg':'webp';
+  const metadata={name:`${comic.id}.${ext}`,mimeType:blob.type,parents:[folder.id]};
+  const boundary='longbox-cover-'+Math.random().toString(36).slice(2);
+  const body=new Blob([
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,
+    `--${boundary}\r\nContent-Type: ${blob.type}\r\n\r\n`, blob, `\r\n--${boundary}--`
+  ],{type:`multipart/related; boundary=${boundary}`});
+  const res=await driveApi('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType',{
+    method:'POST',headers:{'Content-Type':`multipart/related; boundary=${boundary}`},body
+  });
+  const file=await res.json();
+  return {...comic,coverFileId:file.id,coverFileName:file.name,coverMimeType:file.mimeType,updatedAt:new Date().toISOString()};
+}
+
+async function driveDownloadCover(fileId){
+  const res=await driveApi(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`);
+  const blob=await res.blob();
+  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(blob);});
+}
+
+async function migrateCoverBatch(){
+  const candidates=comics.filter(c=>!c.deletedAt && c.coverData && !c.coverFileId).slice(0,COVER_MIGRATION_BATCH);
+  if(!candidates.length) return 0;
+  setDriveStatus('syncing',`Ottimizzazione copertine: ${candidates.length}...`);
+  for(const c of candidates){
+    try{
+      const updated=await driveUploadCover(c);
+      if(updated!==c){ comics=comics.map(x=>x.id===c.id?updated:x); await saveOne(updated); }
+    }catch(e){ console.warn('Migrazione copertina non riuscita',c.id,e); }
+  }
+  return candidates.length;
+}
+
+function drivePayload(){
+  return comics.map(c=>{
+    if(c.coverFileId){ const {coverData,...rest}=c; return rest; }
+    return c;
+  });
+}
+
+async function hydrateRemoteCovers(){
+  const missing=comics.filter(c=>!c.deletedAt && c.coverFileId && !c.coverData);
+  for(const c of missing){
+    try{
+      const data=await driveDownloadCover(c.coverFileId);
+      const updated={...c,coverData:data}; comics=comics.map(x=>x.id===c.id?updated:x); await saveOne(updated);
+      render();
+    }catch(e){ console.warn('Download copertina non riuscito',c.coverFileId,e); }
+  }
+}
+
+async function driveGetFileMetadata(fileId){
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=id,name,parents,trashed`);
+  return res.json();
+}
+
+async function driveEnsureFolder(){
+  if(driveFolderId){
+    try{
+      const saved = await driveGetFileMetadata(driveFolderId);
+      if(!saved.trashed && saved.name === DRIVE_FOLDER_NAME) return saved;
+    }catch(e){
+      console.warn('Cartella Longobox salvata non più disponibile', e);
+    }
+    driveFolderId = null;
+    localStorage.removeItem('longbox_drive_folder_id');
+  }
+
+  let folder = await driveFindFolder();
+  if(!folder) folder = await driveCreateFolder();
+  driveFolderId = folder.id;
+  localStorage.setItem('longbox_drive_folder_id', folder.id);
+  return folder;
+}
+
+async function driveFindFileInFolder(folderId){
+  const name = driveQueryValue(DRIVE_FILE_NAME);
+  const q = encodeURIComponent(`name='${name}' and '${driveQueryValue(folderId)}' in parents and trashed=false`);
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,parents,modifiedTime)&orderBy=modifiedTime desc`);
+  const data = await res.json();
+  return data.files && data.files.length ? data.files[0] : null;
+}
+
+async function driveFindRootFile(){
+  const name = driveQueryValue(DRIVE_FILE_NAME);
+  const q = encodeURIComponent(`name='${name}' and 'root' in parents and trashed=false`);
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id,name,parents,modifiedTime)&orderBy=modifiedTime desc`);
+  const data = await res.json();
+  return data.files && data.files.length ? data.files[0] : null;
+}
+
+async function driveMoveFileToFolder(fileId, folderId){
+  const meta = await driveGetFileMetadata(fileId);
+  const currentParents = Array.isArray(meta.parents) ? meta.parents : [];
+  if(currentParents.includes(folderId)) return meta;
+  const params = new URLSearchParams({addParents:folderId, fields:'id,name,parents'});
+  if(currentParents.length) params.set('removeParents', currentParents.join(','));
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?${params.toString()}`, {
+    method: 'PATCH'
+  });
+  return res.json();
+}
+
+async function driveResolveDataFile(){
+  const folder = await driveEnsureFolder();
+
+  if(driveFileId){
+    try{
+      const saved = await driveGetFileMetadata(driveFileId);
+      if(!saved.trashed && saved.name === DRIVE_FILE_NAME){
+        if(!(saved.parents || []).includes(folder.id)){
+          await driveMoveFileToFolder(saved.id, folder.id);
+        }
+        return {id:saved.id, name:saved.name, parents:[folder.id]};
+      }
+    }catch(e){
+      console.warn('File Drive salvato non più disponibile', e);
+    }
+    driveFileId = null;
+    localStorage.removeItem('longbox_drive_file_id');
+  }
+
+  const inFolder = await driveFindFileInFolder(folder.id);
+  if(inFolder) return inFolder;
+
+  const rootFile = await driveFindRootFile();
+  if(rootFile){
+    await driveMoveFileToFolder(rootFile.id, folder.id);
+    return {...rootFile, parents:[folder.id]};
+  }
+  return null;
+}
+
+async function driveCreateFile(content){
+  const folder = await driveEnsureFolder();
+  const boundary = 'longbox-boundary';
+  const metadata = { name: DRIVE_FILE_NAME, mimeType: 'application/json', parents:[folder.id] };
+  const body =
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n` +
+    `--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
+  const res = await driveApi('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,parents', {
+    method: 'POST',
+    headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+    body
+  });
+  const data = await res.json();
+  return data.id;
+}
+
+async function driveGetFileContent(fileId){
+  const res = await driveApi(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+  return res.text();
+}
+
+async function driveUpdateFile(fileId, content){
+  await driveApi(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: content
+  });
+}
+
+async function driveInitialSync(){
+  try{
+    const file = await driveResolveDataFile();
+    if(!file){
+      comics = comics.map(normalizeRecord);
+      await migrateCoverBatch();
+      const id = await driveCreateFile(JSON.stringify(drivePayload()));
+      driveFileId = id;
+      localStorage.setItem('longbox_drive_file_id', id);
+    }else{
+      driveFileId = file.id;
+      localStorage.setItem('longbox_drive_file_id', file.id);
+      const remoteText = await driveGetFileContent(file.id);
+      let remote = [];
+      try{ remote = JSON.parse(remoteText); if(!Array.isArray(remote)) remote=[]; }catch(e){ remote=[]; }
+      comics = mergeRecords(comics, remote);
+      await replaceAll(comics);
+      await migrateCoverBatch();
+      await driveUpdateFile(file.id, JSON.stringify(drivePayload()));
+    }
+    setDriveStatus('connected', 'Connesso e sincronizzato');
+    markDriveSynced();
+    render();
+    hydrateRemoteCovers();
+  }catch(e){
+    console.error('Errore sincronizzazione Drive', e);
+    setDriveStatus('', 'Errore di sincronizzazione');
+    updatePendingSyncText('error');
+  }
+}
+
+function driveSyncNow(immediate=false){
+  if(!driveConnected || !driveFileId){ updatePendingSyncText(); return; }
+  clearTimeout(driveSyncTimer);
+  setDriveStatus('syncing', 'Sincronizzazione...');
+  const run = async () => {
+    try{
+      const remoteText = await driveGetFileContent(driveFileId);
+      let remote=[]; try{ remote=JSON.parse(remoteText); if(!Array.isArray(remote)) remote=[]; }catch(e){}
+      comics = mergeRecords(comics, remote);
+      await replaceAll(comics);
+      await migrateCoverBatch();
+      await driveUpdateFile(driveFileId, JSON.stringify(drivePayload()));
+      setDriveStatus('connected', 'Connesso e sincronizzato');
+      markDriveSynced();
+      render();
+      hydrateRemoteCovers();
+    }catch(e){
+      console.error('Errore salvataggio su Drive', e);
+      setDriveStatus('connected', 'Errore, riprovo al prossimo salvataggio');
+      updatePendingSyncText('error');
+    }
+  };
+  if(immediate) run(); else driveSyncTimer=setTimeout(run,800);
+}
+
+function driveDisconnect(){
+  driveConnected = false;
+  driveAccessToken = null;
+  updateDriveReconnectUI();
+}
+
+async function loadComics(){
+  try{
+    const db = await openDB();
+    comics = await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }catch(e){
+    console.error('Errore di caricamento', e);
+    comics = [];
+  }
+  loaded = true;
+  render();
+}
+
+async function saveOne(record){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(record);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function deleteOne(id){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function replaceAll(records){
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.clear();
+    records.forEach(r => store.put(r));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 800;
+        let { width, height } = img;
+        if(width > height && width > maxDim){
+          height = Math.round(height * (maxDim / width));
+          width = maxDim;
+        }else if(height > maxDim){
+          width = Math.round(width * (maxDim / height));
+          height = maxDim;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/webp', 0.78));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+
+function escapeHtml(str){
+  return (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function acquisitionState(c){ return ['wanted','preordered','ignored'].includes(c.acquisition) ? c.acquisition : 'owned'; }
+function issueText(c){
+  const raw=String(c.issue || '').trim().replace(/^#+\s*/,'');
+  return raw ? `#${raw}` : '#?';
+}
+
+function cleanIssueValue(value){
+  return String(value ?? '').trim().replace(/^#+\s*/, '');
+}
+
+function formatContentItem(item){
+  const market = String(item?.market || '').trim();
+  const series = String(item?.series || '').trim();
+  const run = String(item?.run || '').trim();
+  const from = cleanIssueValue(item?.from);
+  const to = cleanIssueValue(item?.to);
+  if(!series) return '';
+  const prefix=[market,series,run].filter(Boolean).join(' · ');
+  if(from && to && from !== to) return `${prefix} #${from}–${to}`;
+  if(from) return `${prefix} #${from}`;
+  return prefix;
+}
+
+function parseLegacyContents(value){
+  if(!value || typeof value !== 'string') return [];
+  return value.split(/\n|;/).map(line => line.trim()).filter(Boolean).map(line => {
+    const match = line.match(/^(.*?)\s+#?([^#–—-]+?)(?:\s*[–—-]\s*#?(.+))?$/);
+    if(!match) return {market:'USA',series:line,run:'',from:'',to:''};
+    return {market:'USA',series:match[1].trim(),run:'',from:cleanIssueValue(match[2]),to:cleanIssueValue(match[3] || '')};
+  });
+}
+
+function contentItemsFor(comic){
+  if(Array.isArray(comic?.contentItems)){
+    return comic.contentItems.map(item => ({
+      market:String(item?.market || 'USA').trim(),
+      series:String(item?.series || '').trim(),
+      run:String(item?.run || '').trim(),
+      from:cleanIssueValue(item?.from),
+      to:cleanIssueValue(item?.to)
+    })).filter(item => item.series || item.from || item.to);
+  }
+  return parseLegacyContents(comic?.contents || '');
+}
+
+function contentSearchText(comic){
+  return contentItemsFor(comic).map(item => [item.market,item.series,item.run,item.from,item.to,formatContentItem(item)].join(' ')).join(' ');
+}
+
+function contentRowHtml(item={}){
+  return `<div class="content-row">
+    <div class="field"><label>Mercato</label><input class="content-market" type="text" list="marketOptions" placeholder="USA" value="${escapeHtml(item.market || 'USA')}"></div>
+    <div class="field content-series-field"><label>Serie originale</label><input class="content-series" type="text" list="seriesOptions" placeholder="es. The Amazing Spider-Man" value="${escapeHtml(item.series || '')}"></div>
+    <div class="field"><label>Volume / Run</label><input class="content-run" type="text" list="runOptions" placeholder="es. Vol. 7" value="${escapeHtml(item.run || '')}"></div>
+    <div class="field"><label>Dal n.</label><input class="content-from" type="text" inputmode="numeric" placeholder="16" value="${escapeHtml(cleanIssueValue(item.from))}"></div>
+    <div class="field"><label>Al n.</label><input class="content-to" type="text" inputmode="numeric" placeholder="17" value="${escapeHtml(cleanIssueValue(item.to))}"></div>
+    <button class="btn ghost small remove-content-row" type="button" aria-label="Rimuovi contenuto">Rimuovi</button>
+  </div>`;
+}
+
+function renderContentRows(items=[]){
+  const list = document.getElementById('contentsList');
+  const normalized = items.length ? items : [{market:'USA',series:'',run:'',from:'',to:''}];
+  list.innerHTML = normalized.map(contentRowHtml).join('');
+  updateContentsPreview();
+}
+
+function collectContentItems(){
+  return [...document.querySelectorAll('#contentsList .content-row')].map(row => ({
+    market:row.querySelector('.content-market').value.trim() || 'USA',
+    series:row.querySelector('.content-series').value.trim(),
+    run:row.querySelector('.content-run').value.trim(),
+    from:cleanIssueValue(row.querySelector('.content-from').value),
+    to:cleanIssueValue(row.querySelector('.content-to').value)
+  })).filter(item => item.series || item.from || item.to);
+}
+
+function updateContentsPreview(){
+  const preview = document.getElementById('contentsPreview');
+  if(!preview) return;
+  const lines = collectContentItems().map(formatContentItem).filter(Boolean);
+  preview.innerHTML = lines.length ? `<strong>Contiene:</strong><br>${lines.map(escapeHtml).join('<br>')}` : '';
+}
+
+function queryTokens(q){ return String(q||'').toLowerCase().replace(/[.,;:()]/g,' ').split(/\s+/).filter(Boolean); }
+function matchingContentLines(comic,q){
+  const tokens=queryTokens(q);
+  if(!tokens.length) return [];
+  return contentItemsFor(comic).filter(item=>{
+    const text=formatContentItem(item).toLowerCase();
+    return tokens.every(t=>text.includes(t.replace(/^#/,'').length? t.replace(/^#/,'') : t));
+  }).map(formatContentItem);
+}
+
+function comicFormat(c){
+  return c?.format === 'Variant' ? 'Singolo albo' : (c?.format || 'Singolo albo');
+}
+
+function comicEdition(c){
+  return c?.edition || (c?.format === 'Variant' ? 'Variant Cover' : 'Standard');
+}
+
+function editionBadgeData(c){
+  const edition = comicEdition(c);
+  const map = {
+    'Variant Cover':['VARIANT','variant'],
+    'Virgin Variant':['VIRGIN','virgin'],
+    'Foil Variant':['FOIL','foil'],
+    'Blank Cover':['BLANK','blank'],
+    'Sketch Cover':['SKETCH','sketch'],
+    'Limited Edition':['LIMITED','limited'],
+    'Signed Edition':['SIGNED','signed'],
+    'Altro':['SPECIALE','other']
+  };
+  return map[edition] || null;
+}
+
+function renderStats(){
+  const active = activeComics();
+  const owned = active.filter(c => acquisitionState(c) === 'owned');
+  const wanted = active.filter(c => acquisitionState(c) === 'wanted');
+  const series = new Set(active.map(c => (c.series||'').trim().toLowerCase()).filter(Boolean)).size;
+  const value = owned.reduce((sum,c) => sum + (parseFloat(c.price ?? c.value) || 0), 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="num">${owned.length}</div><div class="lab">Posseduti</div></div>
+    <div class="stat"><div class="num">${wanted.length}</div><div class="lab">Da acquistare</div></div>
+    <div class="stat"><div class="num">${series}</div><div class="lab">Serie</div></div>
+    <div class="stat"><div class="num">€${value.toLocaleString('it-IT',{maximumFractionDigits:2})}</div><div class="lab">Prezzo posseduti</div></div>
+  `;
+}
+
+function uniqueSorted(field){
+  const values = new Map();
+  activeComics().forEach(c => {
+    const val = (c[field] || '').trim();
+    if(val) values.set(val.toLocaleLowerCase('it'), val);
+  });
+  return [...values.values()].sort((a,b) => a.localeCompare(b, 'it'));
+}
+
+function populateDynamicOptions(){
+  const configs = [
+    ['seriesOptions','series'], ['runOptions','run'], ['storyArcOptions','storyArc'], ['universeOptions','universe'],
+    ['marketOptions','market'], ['languageOptions','language'], ['publisherOptions','publisher'], ['collectionOptions','collection']
+  ];
+  configs.forEach(([id,field]) => {
+    document.getElementById(id).innerHTML = uniqueSorted(field).map(v => `<option value="${escapeHtml(v)}"></option>`).join('');
+  });
+  const filters = [
+    ['filterUniverse','universe','Tutti gli universi'],
+    ['filterMarket','market','Tutti i mercati'], ['filterLanguage','language','Tutte le lingue'],
+    ['filterPublisher','publisher','Tutti gli editori'],
+    ['filterCollection','collection','Tutte le collane']
+  ];
+  filters.forEach(([id,field,label]) => {
+    const el = document.getElementById(id);
+    const current = el.value;
+    el.innerHTML = `<option value="">${label}</option>` + uniqueSorted(field).map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+    if([...el.options].some(o => o.value === current)) el.value = current;
+  });
+}
+
+function naturalComicSort(a,b){
+  const av = String(a.issue || '');
+  const bv = String(b.issue || '');
+  return av.localeCompare(bv, 'it', {numeric:true, sensitivity:'base'});
+}
+
+function comicTreeLabel(c){
+  const title = (c.title || '').trim();
+  const lead = issueText(c);
+  return `${lead}${title ? ' — ' + title : ''}`;
+}
+
+function renderSeriesList(){
+  const listEl=document.getElementById('seriesList');
+  const currentEl=document.getElementById('seriesCurrent');
+  const universes=new Map();
+  activeComics().forEach(c=>{
+    const universe=(c.universe||'Senza universo').trim();
+    const market=(c.market||'Non specificato').trim();
+    const series=(c.series||'').trim(); if(!series) return;
+    const run=(c.run||'Senza volume/run').trim();
+    const uk=universe.toLowerCase(), mk=market.toLowerCase(), sk=series.toLowerCase(), rk=run.toLowerCase();
+    if(!universes.has(uk)) universes.set(uk,{name:universe,markets:new Map(),count:0});
+    const u=universes.get(uk); if(!u.markets.has(mk)) u.markets.set(mk,{name:market,series:new Map(),count:0});
+    const m=u.markets.get(mk); if(!m.series.has(sk)) m.series.set(sk,{name:series,runs:new Map(),count:0});
+    const se=m.series.get(sk); if(!se.runs.has(rk)) se.runs.set(rk,{name:run,comics:[]});
+    se.runs.get(rk).comics.push(c); se.count++; m.count++; u.count++;
+  });
+  const groups=[...universes.values()].sort((a,b)=>a.name.localeCompare(b.name,'it'));
+  if(!groups.length){ listEl.innerHTML='<span class="series-current">Universi, mercati, serie, run e numeri compariranno qui.</span>'; currentEl.style.display='none'; return; }
+  listEl.innerHTML=groups.map(u=>`<div class="universe-group"><button class="universe-head" type="button"><span>${escapeHtml(u.name)}</span><span class="series-count">${u.count}</span></button><div class="universe-series">${[...u.markets.values()].sort((a,b)=>a.name.localeCompare(b.name,'it')).map(m=>`<div class="market-group"><button class="market-head" type="button">${escapeHtml(m.name)} <span class="series-count">${m.count}</span></button>${[...m.series.values()].sort((a,b)=>a.name.localeCompare(b.name,'it')).map(se=>{
+    const expanded=selectedSeries.toLowerCase()===se.name.toLowerCase() && selectedUniverse.toLowerCase()===u.name.toLowerCase() && selectedMarket.toLowerCase()===m.name.toLowerCase();
+    return `<div class="series-node${expanded?' expanded':''}"><button class="series-chip${expanded?' active':''}" type="button" data-series="${escapeHtml(se.name)}" data-universe="${escapeHtml(u.name)}" data-market="${escapeHtml(m.name)}"><span>${escapeHtml(se.name)}</span><span class="series-count">${se.count}</span></button><div class="series-issues">${[...se.runs.values()].sort((a,b)=>a.name.localeCompare(b.name,'it',{numeric:true})).map(r=>`<div class="run-group"><button class="run-head" type="button">${escapeHtml(r.name)}</button><div class="run-issues">${[...r.comics].sort((a,b)=>String(a.number||'').localeCompare(String(b.number||''),'it',{numeric:true})).map(c=>`<button class="issue-link${['wanted','preordered'].includes(acquisitionState(c))?' missing':''}${selectedComicId===c.id?' active':''}" type="button" data-comic-id="${escapeHtml(c.id)}"><span class="issue-number">${acquisitionState(c)==='wanted'?'○ ':acquisitionState(c)==='preordered'?'◐ ':acquisitionState(c)==='ignored'?'– ':'✓ '}n. ${escapeHtml(c.number||'?')}</span>${c.issue?`<small> · Legacy #${escapeHtml(cleanIssueValue(c.issue))}</small>`:''}${c.title?` — ${escapeHtml(c.title)}`:''}</button>`).join('')}</div></div>`).join('')}</div></div>`;
+  }).join('')}</div>`).join('')}</div></div>`).join('');
+  listEl.querySelectorAll('.universe-head').forEach(b=>b.addEventListener('click',()=>b.closest('.universe-group').classList.toggle('collapsed')));
+  listEl.querySelectorAll('.market-head').forEach(b=>b.addEventListener('click',()=>{const box=b.parentElement; [...box.children].slice(1).forEach(x=>x.hidden=!x.hidden)}));
+  listEl.querySelectorAll('.run-head').forEach(b=>b.addEventListener('click',()=>{const x=b.nextElementSibling;if(x)x.hidden=!x.hidden;}));
+  listEl.querySelectorAll('.series-chip').forEach(b=>b.addEventListener('click',()=>{
+    const same=selectedSeries.toLowerCase()===b.dataset.series.toLowerCase() && selectedUniverse.toLowerCase()===b.dataset.universe.toLowerCase() && selectedMarket.toLowerCase()===b.dataset.market.toLowerCase();
+    selectedSeries=same?'':b.dataset.series; selectedUniverse=same?'':b.dataset.universe; selectedMarket=same?'':b.dataset.market; selectedComicId=''; render();
+  }));
+  listEl.querySelectorAll('.issue-link').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();selectedComicId=selectedComicId===b.dataset.comicId?'':b.dataset.comicId;render();}));
+  if(selectedComicId){const c=comics.find(x=>x.id===selectedComicId); currentEl.innerHTML=c?`Selezione: <strong>${escapeHtml([c.market,c.series,c.run,`n. ${c.number||'?'}`].filter(Boolean).join(' → '))}</strong>`:''; currentEl.style.display=c?'block':'none';}
+  else if(selectedSeries){currentEl.innerHTML=`Selezione: <strong>${escapeHtml([selectedUniverse,selectedMarket,selectedSeries].filter(Boolean).join(' → '))}</strong>`;currentEl.style.display='block';}
+  else currentEl.style.display='none';
+}
+
+function getFiltered(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const acquisitionF = document.getElementById('filterAcquisition').value;
+  const formatF = document.getElementById('filterFormat').value;
+  const universeF = document.getElementById('filterUniverse').value;
+  const marketF = document.getElementById('filterMarket').value;
+  const languageF = document.getElementById('filterLanguage').value;
+  const publisherF = document.getElementById('filterPublisher').value;
+  const collectionF = document.getElementById('filterCollection').value;
+  const sortBy = document.getElementById('sortBy').value;
+
+  let list = activeComics().filter(c => {
+    if(shopMode && !['wanted','preordered'].includes(acquisitionState(c))) return false;
+    if(acquisitionF && acquisitionState(c) !== acquisitionF) return false;
+    if(formatF && comicFormat(c) !== formatF) return false;
+    if(universeF && (c.universe || '') !== universeF) return false;
+    if(marketF && (c.market || '') !== marketF) return false;
+    if(languageF && (c.language || '') !== languageF) return false;
+    if(publisherF && (c.publisher || '') !== publisherF) return false;
+    if(collectionF && (c.collection || '') !== collectionF) return false;
+    if(selectedUniverse && (c.universe || 'Senza universo').toLocaleLowerCase('it') !== selectedUniverse.toLocaleLowerCase('it')) return false;
+    if(selectedMarket && (c.market || 'Non specificato').toLocaleLowerCase('it') !== selectedMarket.toLocaleLowerCase('it')) return false;
+    if(selectedSeries && (c.series || '').toLocaleLowerCase('it') !== selectedSeries.toLocaleLowerCase('it')) return false;
+    if(selectedComicId && c.id !== selectedComicId) return false;
+    if(!q) return true;
+    const hay = [c.title,c.series,c.run,c.storyArc,c.number,c.issue,c.market,c.language,c.universe,c.publisher,c.collection,c.writer,c.artist,c.tags,c.contents,contentSearchText(c),c.notes,comicEdition(c),c.editionDetails,c.printing,c.barcode,c.shop,c.paidPrice,c.maxPrice].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  if(sortBy === 'title_asc') list.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+  else if(sortBy === 'year_desc') list.sort((a,b)=> (b.year||0)-(a.year||0));
+  else if(sortBy === 'value_desc') list.sort((a,b)=> (parseFloat(b.price ?? b.value)||0)-(parseFloat(a.price ?? a.value)||0));
+  else list.sort((a,b)=> (b.addedAt||0)-(a.addedAt||0));
+
+  return list;
+}
+
+function render(){
+  renderStats();
+  populateDynamicOptions();
+  renderSeriesList();
+  const grid = document.getElementById('grid');
+  const list = getFiltered();
+
+  if(!loaded) return;
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty">
+      <span class="logo">?!</span>
+      <p>${activeComics().length===0 ? 'La tua collezione è vuota. Aggiungi il primo fumetto.' : 'Nessun fumetto corrisponde alla ricerca.'}</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(c => {
+    const img = c.coverData || c.coverUrl;
+    const cover = img
+      ? `<div class="cover" style="background-image:url('${escapeHtml(img)}')">`
+      : `<div class="cover placeholder"><span class="issue-big">${escapeHtml(issueText(c))}</span>`;
+    return `
+    <div class="card${['wanted','preordered'].includes(acquisitionState(c))?' missing-card':''}" data-id="${c.id}">
+      ${cover}
+        ${shopMode ? `<input class="select-comic" type="checkbox" data-select-id="${escapeHtml(c.id)}" ${selectedForBulk.has(c.id)?'checked':''} aria-label="Seleziona ${escapeHtml(c.title||'fumetto')}">` : ''}
+        <span class="badge">${escapeHtml((c.condition||'').split(' - ')[0] || '')}</span>
+        ${(() => { const badge = editionBadgeData(c); return badge ? `<span class="edition-badge ${badge[1]}">${badge[0]}</span>` : ''; })()}
+        ${acquisitionState(c)==='wanted' ? '<span class="buy-badge">DA ACQUISTARE</span>' : acquisitionState(c)==='preordered' ? '<span class="buy-badge">PREORDINATO</span>' : ''}
+      </div>
+      <div class="card-body">
+        <p class="card-title">${escapeHtml(c.title || 'Senza titolo')}</p>
+        <p class="card-sub">${escapeHtml(c.series || '')}${c.run ? ' · ' + escapeHtml(c.run) : ''}${c.number ? ' · n. ' + escapeHtml(c.number) : ''}${c.issue ? ' · Legacy #' + escapeHtml(cleanIssueValue(c.issue)) : ''}</p>
+        <p class="card-sub">${escapeHtml([c.market,c.language,c.universe,c.collection].filter(Boolean).join(' · '))}</p>
+        ${matchingContentLines(c,document.getElementById('search').value).length ? `<div class="content-match"><strong>Contenuto trovato:</strong><br>${matchingContentLines(c,document.getElementById('search').value).map(escapeHtml).join('<br>')}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  grid.querySelectorAll('.card').forEach(el => {
+    el.addEventListener('click', e => { if(!e.target.classList.contains('select-comic')) openModal(el.dataset.id); });
+  });
+  grid.querySelectorAll('.select-comic').forEach(el=>el.addEventListener('change',()=>{
+    if(el.checked) selectedForBulk.add(el.dataset.selectId); else selectedForBulk.delete(el.dataset.selectId);
+    updateBulkBar();
+  }));
+  updateBulkBar();
+  updateStorageMeta();
+}
+
+function openModal(id){
+  const overlay = document.getElementById('overlay');
+  document.getElementById('editId').value = id || '';
+  const c = id ? comics.find(x => x.id === id) : null;
+
+  document.getElementById('modalTitle').textContent = c ? 'Modifica fumetto' : 'Nuovo fumetto';
+  document.getElementById('deleteBtn').style.display = c ? 'inline-block' : 'none';
+
+  document.getElementById('f-title').value = c?.title || '';
+  document.getElementById('f-acquisition').value = c?.acquisition || 'owned';
+  document.getElementById('f-series').value = c?.series || '';
+  document.getElementById('f-run').value = c?.run || '';
+  document.getElementById('f-story-arc').value = c?.storyArc || '';
+  document.getElementById('f-number').value = c?.number || '';
+  document.getElementById('f-issue').value = c?.issue || '';
+  document.getElementById('f-universe').value = c?.universe || '';
+  document.getElementById('f-market').value = c?.market || '';
+  document.getElementById('f-language').value = c?.language || '';
+  document.getElementById('f-publisher').value = c?.publisher || '';
+  document.getElementById('f-collection').value = c?.collection || '';
+  document.getElementById('f-year').value = c?.year || '';
+  document.getElementById('f-writer').value = c?.writer || '';
+  document.getElementById('f-artist').value = c?.artist || '';
+  document.getElementById('f-format').value = comicFormat(c);
+  document.getElementById('f-condition').value = c?.condition || 'NM - Near Mint';
+  document.getElementById('f-edition').value = comicEdition(c);
+  document.getElementById('f-edition-details').value = c?.editionDetails || '';
+  document.getElementById('f-printing').value = c?.printing || '';
+  renderContentRows(contentItemsFor(c));
+  updateEditionDetailsVisibility();
+  updateVolumeContentsVisibility();
+  document.getElementById('f-price').value = c?.price ?? c?.value ?? '';
+  document.getElementById('f-paid-price').value = c?.paidPrice ?? '';
+  document.getElementById('f-max-price').value = c?.maxPrice ?? '';
+  document.getElementById('f-quantity').value = c?.quantity || 1;
+  document.getElementById('f-purchase-date').value = c?.purchaseDate || '';
+  document.getElementById('f-shop').value = c?.shop || '';
+  document.getElementById('f-barcode').value = c?.barcode || '';
+  document.getElementById('duplicateWarning').classList.remove('show');
+  document.getElementById('f-cover').value = c?.coverUrl || '';
+  document.getElementById('f-tags').value = c?.tags || '';
+  document.getElementById('f-notes').value = c?.notes || '';
+  document.getElementById('f-photo').value = '';
+
+  pendingCoverData = 'unset'; // significa "nessuna modifica alla foto"
+  const preview = document.getElementById('coverPreview');
+  const existingImg = c?.coverData || c?.coverUrl;
+  if(existingImg){
+    preview.style.backgroundImage = `url('${existingImg}')`;
+    preview.classList.remove('empty');
+    document.getElementById('removeCoverBtn').style.display = 'inline-block';
+  }else{
+    preview.style.backgroundImage = '';
+    preview.classList.add('empty');
+    document.getElementById('removeCoverBtn').style.display = 'none';
+  }
+
+  overlay.classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.remove('open');
+}
+
+async function saveComic(){
+  const title = document.getElementById('f-title').value.trim();
+  if(!title){
+    document.getElementById('f-title').focus();
+    return;
+  }
+  const id = document.getElementById('editId').value;
+  const existing = id ? comics.find(x => x.id === id) : null;
+
+  let coverData;
+  if(pendingCoverData === 'unset') coverData = existing?.coverData || null;
+  else if(pendingCoverData === 'removed') coverData = null;
+  else coverData = pendingCoverData;
+
+  const data = {
+    id: id || ('c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)),
+    title,
+    acquisition: document.getElementById('f-acquisition').value,
+    series: document.getElementById('f-series').value.trim(),
+    run: document.getElementById('f-run').value.trim(),
+    storyArc: document.getElementById('f-story-arc').value.trim(),
+    number: document.getElementById('f-number').value.trim(),
+    issue: document.getElementById('f-issue').value.trim(),
+    universe: document.getElementById('f-universe').value.trim(),
+    market: document.getElementById('f-market').value.trim(),
+    language: document.getElementById('f-language').value.trim(),
+    publisher: document.getElementById('f-publisher').value.trim(),
+    collection: document.getElementById('f-collection').value.trim(),
+    year: document.getElementById('f-year').value ? parseInt(document.getElementById('f-year').value) : null,
+    writer: document.getElementById('f-writer').value.trim(),
+    artist: document.getElementById('f-artist').value.trim(),
+    format: document.getElementById('f-format').value,
+    condition: document.getElementById('f-condition').value,
+    edition: document.getElementById('f-edition').value,
+    editionDetails: document.getElementById('f-edition-details').value.trim(),
+    printing: document.getElementById('f-printing').value ? parseInt(document.getElementById('f-printing').value, 10) : null,
+    contentItems: collectContentItems(),
+    contents: collectContentItems().map(formatContentItem).filter(Boolean).join('\n'),
+    price: document.getElementById('f-price').value,
+    paidPrice: document.getElementById('f-paid-price').value,
+    maxPrice: document.getElementById('f-max-price').value,
+    quantity: parseInt(document.getElementById('f-quantity').value || '1',10),
+    purchaseDate: document.getElementById('f-purchase-date').value,
+    shop: document.getElementById('f-shop').value.trim(),
+    barcode: document.getElementById('f-barcode').value.trim(),
+    coverUrl: document.getElementById('f-cover').value.trim(),
+    coverData,
+    tags: document.getElementById('f-tags').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    addedAt: existing?.addedAt || Date.now(),
+    createdAt: existing?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deletedAt: null
+  };
+
+  const duplicate = activeComics().find(c => c.id !== data.id &&
+    (c.series||'').toLowerCase() === data.series.toLowerCase() &&
+    (c.market||'').toLowerCase() === data.market.toLowerCase() && (c.run||'').toLowerCase() === data.run.toLowerCase() &&
+    String(c.number||'') === String(data.number||'') && comicEdition(c) === data.edition &&
+    String(c.printing||'') === String(data.printing||''));
+  if(duplicate && !confirm('Esiste già una scheda con la stessa serie, numerazione, edizione e stampa. Vuoi salvarla comunque?')) return;
+  await saveOne(data);
+  if(id){
+    comics = comics.map(c => c.id === id ? data : c);
+  }else{
+    comics.push(data);
+  }
+  markLocalChange();
+  driveSyncNow();
+  closeModal();
+  render();
+}
+
+async function deleteComic(){
+  const id = document.getElementById('editId').value;
+  if(!id || !confirm('Eliminare questa scheda?')) return;
+  const now=new Date().toISOString();
+  const existing=comics.find(c=>c.id===id);
+  const tombstone={...existing, updatedAt:now, deletedAt:now};
+  await saveOne(tombstone);
+  comics=comics.map(c=>c.id===id?tombstone:c);
+  markLocalChange();
+  driveSyncNow();
+  closeModal();
+  render();
+}
+
+
+function updateBulkBar(){
+  const bar=document.getElementById('bulkBar');
+  bar.classList.toggle('show', shopMode && selectedForBulk.size>0);
+  document.getElementById('bulkCount').textContent=`${selectedForBulk.size} selezionati`;
+}
+async function markSelectedOwned(){
+  if(!selectedForBulk.size) return;
+  const now=new Date().toISOString();
+  comics=comics.map(c=>selectedForBulk.has(c.id)?{...c,acquisition:'owned',purchaseDate:c.purchaseDate||now.slice(0,10),updatedAt:now}:c);
+  await replaceAll(comics); selectedForBulk.clear(); markLocalChange(); driveSyncNow(); render();
+}
+function updateStorageMeta(){
+  const bytes=new Blob([JSON.stringify(comics)]).size;
+  document.getElementById('storageMeta').textContent=`Archivio: ${(bytes/1024/1024).toFixed(2)} MB`;
+}
+function seriesRanges(){ try{return JSON.parse(localStorage.getItem('longbox_series_ranges')||'{}')}catch(e){return{}} }
+function parseIssueNumber(value){
+  const cleaned=String(value??'').trim().replace(/^#+\s*/,'');
+  const match=cleaned.match(/^\d+/);
+  return match ? parseInt(match[0],10) : NaN;
+}
+function seriesTemplate(name){
+  const records=activeComics().filter(c=>(c.series||'').trim().toLocaleLowerCase('it')===name.trim().toLocaleLowerCase('it'));
+  if(!records.length) return null;
+  return [...records].sort((a,b)=>recordTime(b)-recordTime(a))[0];
+}
+function missingIssuesForSeries(name,start,end){
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<start||end-start>500) return [];
+  const existing=new Set(activeComics()
+    .filter(c=>(c.series||'').trim().toLocaleLowerCase('it')===name.trim().toLocaleLowerCase('it'))
+    .map(c=>parseIssueNumber(c.issue)).filter(Number.isFinite));
+  const missing=[];
+  for(let n=start;n<=end;n++) if(!existing.has(n)) missing.push(n);
+  return missing;
+}
+function showSeriesGenerateResult(message,isError=false){
+  const el=document.getElementById('seriesGenerateResult');
+  el.textContent=message;
+  el.style.background=isError?'#fff': 'var(--gold)';
+  el.style.color=isError?'var(--red-dark)':'var(--ink)';
+  el.classList.add('show');
+}
+function openSeriesConfig(){
+  const ranges=seriesRanges();
+  const rows=uniqueSorted('series').map(name=>{
+    const r=ranges[name.toLowerCase()]||{};
+    const current=activeComics().filter(c=>(c.series||'').trim().toLowerCase()===name.toLowerCase());
+    const missing=missingIssuesForSeries(name,Number(r.start),Number(r.end));
+    const summary=Number.isFinite(Number(r.start))&&Number.isFinite(Number(r.end))
+      ? `${current.length} schede presenti · ${missing.length} numerazioni mancanti nell’intervallo #${r.start}–#${r.end}`
+      : `${current.length} schede presenti · imposta l’intervallo per generare le mancanti`;
+    return `<div class="series-config-row" data-series-row="${escapeHtml(name)}">
+      <strong>${escapeHtml(name)}</strong>
+      <input type="number" min="0" placeholder="Da #" data-range-series="${escapeHtml(name)}" data-range-part="start" value="${r.start??''}" aria-label="Primo numero di ${escapeHtml(name)}">
+      <input type="number" min="0" placeholder="A #" data-range-series="${escapeHtml(name)}" data-range-part="end" value="${r.end??''}" aria-label="Ultimo numero di ${escapeHtml(name)}">
+      <div class="series-actions"><button class="btn small primary generate-series-btn" type="button" data-generate-series="${escapeHtml(name)}">Genera mancanti</button></div>
+      <div class="series-config-summary">${escapeHtml(summary)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('seriesConfigList').innerHTML=rows||'<p>Nessuna serie disponibile.</p>';
+  document.getElementById('seriesGenerateResult').classList.remove('show');
+  document.getElementById('seriesConfigOverlay').classList.add('open');
+}
+function collectSeriesRangesFromModal(){
+  const out={};
+  document.querySelectorAll('[data-range-series]').forEach(el=>{
+    const key=el.dataset.rangeSeries.toLowerCase(); out[key]=out[key]||{};
+    if(el.value!=='') out[key][el.dataset.rangePart]=parseInt(el.value,10);
+  });
+  return out;
+}
+function saveSeriesConfig(close=true){
+  const out=collectSeriesRangesFromModal();
+  localStorage.setItem('longbox_series_ranges',JSON.stringify(out));
+  if(close) document.getElementById('seriesConfigOverlay').classList.remove('open');
+  render();
+  return out;
+}
+async function generateMissingSeries(name){
+  const row=[...document.querySelectorAll('.series-config-row')].find(el=>el.dataset.seriesRow===name);
+  if(!row) return;
+  const start=parseInt(row.querySelector('[data-range-part="start"]').value,10);
+  const end=parseInt(row.querySelector('[data-range-part="end"]').value,10);
+  if(!Number.isFinite(start)||!Number.isFinite(end)||end<start){
+    showSeriesGenerateResult(`Per ${name}, inserisci un intervallo valido.`,true); return;
+  }
+  if(end-start>500){ showSeriesGenerateResult('Per sicurezza puoi generare al massimo 501 numeri per volta.',true); return; }
+  const missing=missingIssuesForSeries(name,start,end);
+  if(!missing.length){ showSeriesGenerateResult(`${name}: nessuna numerazione mancante tra #${start} e #${end}.`); return; }
+  const state=document.getElementById('seriesGenerateState').value;
+  const template=seriesTemplate(name);
+  if(!template){ showSeriesGenerateResult(`Non esiste una scheda di ${name} da usare come modello.`,true); return; }
+  const preview=missing.length<=18 ? missing.map(n=>`#${n}`).join(', ') : `${missing.slice(0,8).map(n=>`#${n}`).join(', ')} … ${missing.slice(-3).map(n=>`#${n}`).join(', ')}`;
+  if(!confirm(`${name}\n\nVerranno create ${missing.length} schede: ${preview}\n\nStato: ${state==='owned'?'Posseduto':state==='wanted'?'Da acquistare':'Preordinato'}\n\nContinuare?`)) return;
+  const now=new Date().toISOString();
+  const generated=missing.map((n,i)=>({
+    id:`c_${Date.now()}_${i}_${Math.random().toString(36).slice(2,7)}`,
+    title:`${name} #${n}`,
+    acquisition:state,
+    series:name,
+    number:String(n),
+    issue:'',
+    universe:template.universe||'',
+    market:template.market||'', language:template.language||'', run:template.run||'', storyArc:template.storyArc||'',
+    publisher:template.publisher||'',
+    collection:template.collection||'',
+    year:null,
+    writer:'',artist:'',
+    format:comicFormat(template),
+    condition:template.condition||'NM - Near Mint',
+    edition:'Standard',editionDetails:'',printing:null,
+    contentItems:[],contents:'',
+    price:'',paidPrice:'',maxPrice:'',quantity:1,purchaseDate:'',shop:'',barcode:'',
+    coverUrl:'',coverData:null,tags:'',notes:'Scheda generata automaticamente; completare i dati mancanti.',
+    addedAt:Date.now()+i,createdAt:now,updatedAt:now
+  }));
+  comics.push(...generated);
+  await replaceAll(comics);
+  localStorage.setItem('longbox_series_ranges',JSON.stringify(collectSeriesRangesFromModal()));
+  markLocalChange();
+  driveSyncNow();
+  showSeriesGenerateResult(`${name}: create ${generated.length} nuove schede. Puoi completarle in seguito dalla griglia.`);
+  openSeriesConfig();
+  showSeriesGenerateResult(`${name}: create ${generated.length} nuove schede. Puoi completarle in seguito dalla griglia.`);
+  render();
+}
+async function updateOneAcquisition(id,state){
+  const now=new Date().toISOString();
+  comics=comics.map(c=>c.id===id?{...c,acquisition:state,updatedAt:now}:c);
+  await replaceAll(comics); markLocalChange(); driveSyncNow(); render();
+}
+function csvEscape(v){ const x=String(v??''); return /[",\n]/.test(x)?`"${x.replace(/"/g,'""')}"`:x; }
+function exportCsv(){
+  const fields=['title','series','run','storyArc','number','issue','market','language','universe','publisher','collection','year','writer','artist','format','edition','editionDetails','printing','acquisition','price','paidPrice','maxPrice','quantity','purchaseDate','shop','barcode','contents','tags','notes'];
+  const rows=[fields.join(','),...activeComics().map(c=>fields.map(f=>csvEscape(f==='contents' ? contentItemsFor(c).map(formatContentItem).filter(Boolean).join('\n') : c[f])).join(','))];
+  downloadBlob(rows.join('\n'),'text/csv;charset=utf-8',`longbox-${new Date().toISOString().slice(0,10)}.csv`);
+}
+function downloadBlob(content,type,name){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),0); }
+function checkDuplicateLive(){
+  const id=document.getElementById('editId').value;
+  const series=document.getElementById('f-series').value.trim().toLowerCase();
+  const number=String(document.getElementById('f-number').value).trim();
+  const market=document.getElementById('f-market').value.trim().toLowerCase();
+  const run=document.getElementById('f-run').value.trim().toLowerCase();
+  const edition=document.getElementById('f-edition').value;
+  const printing=document.getElementById('f-printing').value;
+  const dup=activeComics().some(c=>c.id!==id&&(c.series||'').toLowerCase()===series&&(c.market||'').toLowerCase()===market&&(c.run||'').toLowerCase()===run&&String(c.number||'')===number&&comicEdition(c)===edition&&String(c.printing||'')===printing);
+  document.getElementById('duplicateWarning').classList.toggle('show',dup);
+}
+
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+document.getElementById('shopModeBtn').addEventListener('click',()=>{
+  shopMode=!shopMode; document.body.classList.toggle('shop-mode',shopMode);
+  document.getElementById('shopModeBtn').textContent=shopMode?'Esci dalla modalità fumetteria':'Modalità fumetteria';
+  if(shopMode) document.getElementById('filterAcquisition').value=''; else selectedForBulk.clear();
+  render();
+});
+document.getElementById('bulkOwnedBtn').addEventListener('click',markSelectedOwned);
+document.getElementById('bulkClearBtn').addEventListener('click',()=>{selectedForBulk.clear();render();});
+document.getElementById('seriesConfigBtn').addEventListener('click',openSeriesConfig);
+document.getElementById('seriesConfigCloseBtn').addEventListener('click',()=>document.getElementById('seriesConfigOverlay').classList.remove('open'));
+document.getElementById('seriesConfigSaveBtn').addEventListener('click',saveSeriesConfig);
+document.getElementById('seriesConfigList').addEventListener('click',(e)=>{ const btn=e.target.closest('[data-generate-series]'); if(btn) generateMissingSeries(btn.dataset.generateSeries); });
+document.getElementById('syncNowBtn').addEventListener('click',()=>{
+  if(driveConnected) driveSyncNow(true); else document.getElementById('driveConnectBtn').click();
+});
+['f-series','f-run','f-number','f-market','f-edition','f-printing'].forEach(id=>document.getElementById(id).addEventListener('input',checkDuplicateLive));
+document.getElementById('scanBarcodeBtn').addEventListener('click',async()=>{
+  if(!('BarcodeDetector' in window)){ alert('La scansione del codice a barre non è supportata da questo browser. Puoi inserirlo manualmente.'); return; }
+  alert('Su iPhone la scansione diretta dipende dal supporto di Safari. In alternativa fotografa il codice e inseriscilo manualmente.');
+});
+document.getElementById('addWantedBtn').addEventListener('click', () => { openModal(null); document.getElementById('f-acquisition').value = 'wanted'; document.getElementById('modalTitle').textContent = 'Nuovo fumetto da acquistare'; });
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('saveBtn').addEventListener('click', saveComic);
+document.getElementById('deleteBtn').addEventListener('click', deleteComic);
+document.getElementById('overlay').addEventListener('click', (e) => {
+  if(e.target.id === 'overlay') closeModal();
+});
+document.getElementById('search').addEventListener('keydown', (e) => { if(e.key === 'Enter') render(); });
+document.getElementById('applyFiltersBtn').addEventListener('click', render);
+document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+  document.getElementById('search').value = '';
+  document.getElementById('filterAcquisition').value = '';
+  document.getElementById('filterFormat').value = '';
+  document.getElementById('filterUniverse').value = '';
+  document.getElementById('filterMarket').value = '';
+  document.getElementById('filterLanguage').value = '';
+  document.getElementById('filterPublisher').value = '';
+  document.getElementById('filterCollection').value = '';
+  document.getElementById('sortBy').value = 'added_desc';
+  selectedSeries = '';
+  selectedUniverse = '';
+  selectedMarket = '';
+  selectedRun = '';
+  selectedComicId = '';
+  render();
+});
+document.getElementById('sortBy').addEventListener('change', render);
+
+function updateVolumeContentsVisibility(){
+  document.getElementById('volumeContentsField').style.display = 'block';
+  if(!document.querySelector('#contentsList .content-row')) renderContentRows();
+}
+
+function updateEditionDetailsVisibility(){
+  const edition = document.getElementById('f-edition').value;
+  const show = edition !== 'Standard';
+  document.getElementById('editionDetailsField').style.display = show ? 'block' : 'none';
+}
+
+document.getElementById('addContentRowBtn').addEventListener('click', () => {
+  document.getElementById('contentsList').insertAdjacentHTML('beforeend', contentRowHtml());
+  updateContentsPreview();
+});
+document.getElementById('contentsList').addEventListener('click', e => {
+  const removeBtn = e.target.closest('.remove-content-row');
+  if(!removeBtn) return;
+  removeBtn.closest('.content-row').remove();
+  if(!document.querySelector('#contentsList .content-row')) renderContentRows();
+  else updateContentsPreview();
+});
+document.getElementById('contentsList').addEventListener('input', updateContentsPreview);
+
+document.getElementById('f-format').addEventListener('change', updateVolumeContentsVisibility);
+document.getElementById('f-edition').addEventListener('change', updateEditionDetailsVisibility);
+
+document.getElementById('f-photo').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const dataUrl = await compressImage(file);
+    pendingCoverData = dataUrl;
+    const preview = document.getElementById('coverPreview');
+    preview.style.backgroundImage = `url('${dataUrl}')`;
+    preview.classList.remove('empty');
+    document.getElementById('removeCoverBtn').style.display = 'inline-block';
+    document.getElementById('f-cover').value = '';
+  }catch(err){
+    console.error('Errore lettura immagine', err);
+  }
+});
+
+document.getElementById('removeCoverBtn').addEventListener('click', () => {
+  pendingCoverData = 'removed';
+  document.getElementById('f-photo').value = '';
+  document.getElementById('f-cover').value = '';
+  const preview = document.getElementById('coverPreview');
+  preview.style.backgroundImage = '';
+  preview.classList.add('empty');
+  document.getElementById('removeCoverBtn').style.display = 'none';
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(comics, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `longbox-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    if(!Array.isArray(imported)) throw new Error('Formato non valido');
+    const merged = [...comics];
+    imported.forEach(item => {
+      if(!item.id) item.id = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      const idx = merged.findIndex(c => c.id === item.id);
+      if(idx >= 0) merged[idx] = item; else merged.push(item);
+    });
+    comics = merged;
+    comics = comics.map(normalizeRecord);
+    await replaceAll(comics);
+    markLocalChange();
+    driveSyncNow();
+    render();
+  }catch(err){
+    alert('Il file non sembra un backup valido di Longbox.');
+  }
+  e.target.value = '';
+});
+
+document.getElementById('driveConnectBtn').addEventListener('click', () => {
+  if(driveConnected){
+    driveDisconnect();
+    return;
+  }
+  const clientId = getSavedClientId();
+  if(!clientId){
+    document.getElementById('settingsOverlay').classList.add('open');
+    return;
+  }
+  const client = initDriveTokenClient();
+  if(!client){
+    alert('Google Identity Services non è ancora pronto, riprova tra un istante.');
+    return;
+  }
+
+  const previouslyAuthorized = hasPreviousDriveAuthorization();
+  driveReconnectAttempt = previouslyAuthorized;
+  setDriveStatus('syncing', previouslyAuthorized ? 'Ricollegamento a Drive...' : 'Connessione a Drive...');
+
+  // Se l'app era già stata autorizzata, prova senza mostrare di nuovo il consenso.
+  // In caso contrario Google mostrerà la normale schermata di autorizzazione.
+  client.requestAccessToken({ prompt: previouslyAuthorized ? '' : 'consent' });
+});
+
+document.getElementById('driveSettingsBtn').addEventListener('click', () => {
+  document.getElementById('f-clientid').value = getSavedClientId();
+  document.getElementById('settingsOverlay').classList.add('open');
+});
+document.getElementById('settingsCancelBtn').addEventListener('click', () => {
+  document.getElementById('settingsOverlay').classList.remove('open');
+});
+document.getElementById('settingsOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'settingsOverlay') document.getElementById('settingsOverlay').classList.remove('open');
+});
+document.getElementById('settingsSaveBtn').addEventListener('click', () => {
+  const val = document.getElementById('f-clientid').value.trim();
+  localStorage.setItem('longbox_client_id', val);
+  if(!val){
+    localStorage.removeItem('longbox_drive_authorized');
+    localStorage.removeItem('longbox_drive_file_id');
+    driveFileId = null;
+  }
+  driveTokenClient = null;
+  document.getElementById('settingsOverlay').classList.remove('open');
+  if(val){
+    const client = initDriveTokenClient();
+    if(client){
+      setDriveStatus('syncing', 'Connessione a Drive...');
+      client.requestAccessToken({ prompt: hasPreviousDriveAuthorization() ? '' : 'consent' });
+    }
+  }
+});
+
+function updateOnlineState(){
+  const offline = !navigator.onLine;
+  document.getElementById('offlineBanner').classList.toggle('show', offline);
+  if(offline && !driveConnected) setDriveStatus('', 'Offline — copia locale disponibile');
+  else if(!driveConnected) updateDriveReconnectUI();
+}
+
+window.addEventListener('online', ()=>{ updateOnlineState(); if(driveConnected && pendingSyncCount()) driveSyncNow(true); });
+window.addEventListener('offline', updateOnlineState);
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('installHint').classList.add('show');
+});
+document.getElementById('dismissInstallHint').addEventListener('click', () => {
+  document.getElementById('installHint').classList.remove('show');
+  localStorage.setItem('longbox_hide_install_hint','1');
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', async () => {
+    try{
+      const reg=await navigator.serviceWorker.register('./service-worker.js');
+      if(reg.waiting){ waitingServiceWorker=reg.waiting; document.getElementById('updateBanner').classList.add('show'); }
+      reg.addEventListener('updatefound',()=>{
+        const worker=reg.installing;
+        worker?.addEventListener('statechange',()=>{
+          if(worker.state==='installed' && navigator.serviceWorker.controller){
+            waitingServiceWorker=reg.waiting || worker;
+            document.getElementById('updateBanner').classList.add('show');
+          }
+        });
+      });
+    }catch(err){ console.warn('Service worker non registrato',err); }
+  });
+  navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload());
+}
+document.getElementById('reloadAppBtn').addEventListener('click',()=>{
+  if(waitingServiceWorker) waitingServiceWorker.postMessage({type:'SKIP_WAITING'}); else location.reload();
+});
+
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+if(isIos && !isStandalone && localStorage.getItem('longbox_hide_install_hint') !== '1'){
+  document.getElementById('installHint').classList.add('show');
+}
+
+updateLastSyncText();
+updatePendingSyncText();
+updateOnlineState();
+updateDriveReconnectUI();
+loadComics();
+</script>
+</body>
+</html>
